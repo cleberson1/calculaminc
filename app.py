@@ -34,7 +34,7 @@ def calcular_irpf(base_mensal, cenario_nome):
 @st.cache_data
 def carregar_dados():
     niveis = {"SUPERIOR": "superior", "INTERMEDIÁRIO": "intermediario", "AUXILIAR": "auxiliar"}
-    sufixos = {"-2025": "Vigente 2025", "-2026": "Vigente 2026", "-PL": "Proposta PL"}
+    sufixos = {"-2025": "Tabela Vigente 01/01/2025", "-2026": "Tabela Vigente 01/04/2026", "-PL": "Proposta PL 01/04/2026"}
     dfs = []
     for nome_n, prefixo in niveis.items():
         for suf, cenario in sufixos.items():
@@ -58,7 +58,7 @@ nivel_sel = st.sidebar.selectbox("Nível", ["SUPERIOR", "INTERMEDIÁRIO", "AUXIL
 if df_total is not None:
     df_nivel = df_total[df_total['nivel_ref'] == nivel_sel]
     
-    cenarios_ordem = ["Vigente 2025", "Vigente 2026", "Proposta PL"]
+    cenarios_ordem = ["Tabela Vigente 01/01/2025", "Tabela Vigente 01/04/2026", "Proposta PL 01/04/2026"]
     cenario_foco = st.sidebar.selectbox("Cenário para Detalhamento (Aba 1)", cenarios_ordem)
     
     classe_sel = st.sidebar.selectbox("Classe", sorted(df_nivel['classe'].unique(), reverse=True))
@@ -96,9 +96,9 @@ if df_total is not None:
                     "SAUDE": saude_input, "BRUTO": bruto_v, "IR": ir_v, "LIQ": bruto_v - ir_v, "RED": red_v, "ALIQ": aliq_v}
         except: return None
 
-    res_25 = calcular("Vigente 2025")
-    res_26 = calcular("Vigente 2026")
-    res_pl = calcular("Proposta PL")
+    res_25 = calcular("Tabela Vigente 01/01/2025")
+    res_26 = calcular("Tabela Vigente 01/04/2026")
+    res_pl = calcular("Proposta PL 01/04/2026")
 
     # --- 6. INTERFACE ---
     st.title("🏛️ Simulador Salarial MINC/IPHAN")
@@ -106,7 +106,7 @@ if df_total is not None:
     tab1, tab2 = st.tabs(["🎯 Calculadora Individual", "⚖️ Comparativo Cronológico"])
 
     with tab1:
-        res = {"Vigente 2025": res_25, "Vigente 2026": res_26, "Proposta PL": res_pl}[cenario_foco]
+        res = {"Tabela Vigente 01/01/2025": res_25, "Tabela Vigente 01/04/2026": res_26, "Proposta PL 01/04/2026": res_pl}[cenario_foco]
         
         if res:
             st.subheader(f"Detalhamento: {cenario_foco}")
@@ -142,7 +142,7 @@ if df_total is not None:
             st.error("Dados não encontrados.")
 
     with tab2:
-        st.subheader("Evolução: 2025 ➔ 2026 ➔ PL")
+        st.subheader("Evolução: 01/01/2025 ➔ 01/04/2026 ➔ Proposta PL")
         if res_25 and res_26 and res_pl:
             # Soma das rubricas variáveis para simplificar a tabela
             def soma_vars(r): return r['ALIM'] + r['FUNC'] + r['PRE'] + r['SAUDE']
@@ -156,7 +156,7 @@ if df_total is not None:
                 ["IRPF Retido", f"- {formatar_br(res_25['IR'])}", f"- {formatar_br(res_26['IR'])}", f"- {formatar_br(res_pl['IR'])}"],
                 ["LÍQUIDO FINAL", f"**{formatar_br(res_25['LIQ'])}**", f"**{formatar_br(res_26['LIQ'])}**", f"**{formatar_br(res_pl['LIQ'])}**"]
             ]
-            st.table(pd.DataFrame(tabela, columns=["Item", "Atual (2025)", "Vigente (2026)", "Proposta PL"]))
+            st.table(pd.DataFrame(tabela, columns=["Item", "Vigente 01/01/2025", "Vigente 01/04/2026", "Proposta PL 01/04/2026"]))
             
             ganho_total = res_pl['LIQ'] - res_25['LIQ']
             st.success(f"📈 Ganho Acumulado (Hoje ➔ PL): **R$ {formatar_br(ganho_total)}**")
