@@ -6,7 +6,6 @@ import os
 st.set_page_config(page_title="Simulador Salarial IPHAN", layout="wide", page_icon="🏛️")
 
 def formatar_br(valor):
-    """Formata valores para R$ 1.234,56"""
     return f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 def limpar_valor(valor):
@@ -16,9 +15,8 @@ def limpar_valor(valor):
         except: return 0.0
     return float(valor) if valor is not None else 0.0
 
-# --- 2. CÁLCULOS TRIBUTÁRIOS (IRPF & REDUÇÃO LEI 15.270) ---
+# --- 2. CÁLCULOS TRIBUTÁRIOS ---
 def calcular_irpf(base_mensal, cenario_nome):
-    # Tabela Progressiva Padrão
     if base_mensal <= 2259.20: bruto, aliq = 0.0, 0.0
     elif base_mensal <= 2828.65: bruto, aliq = (base_mensal * 0.075) - 169.44, 7.5
     elif base_mensal <= 3751.05: bruto, aliq = (base_mensal * 0.15) - 381.44, 15.0
@@ -26,7 +24,6 @@ def calcular_irpf(base_mensal, cenario_nome):
     else: bruto, aliq = (base_mensal * 0.275) - 896.00, 27.5
     
     reducao = 0.0
-    # Redução de base só se aplica a partir de 2026 (Vigente e PL)
     if "2026" in cenario_nome or "PL" in cenario_nome:
         if base_mensal <= 5000.00: reducao = min(312.89, bruto)
         elif base_mensal <= 7350.00: reducao = max(0.0, min(978.62 - (0.133145 * base_mensal), bruto))
@@ -37,7 +34,6 @@ def calcular_irpf(base_mensal, cenario_nome):
 @st.cache_data
 def carregar_dados():
     niveis = {"SUPERIOR": "superior", "INTERMEDIÁRIO": "intermediario", "AUXILIAR": "auxiliar"}
-    # Ordem definida aqui para o carregamento
     sufixos = {"-2025": "Vigente 2025", "-2026": "Vigente 2026", "-PL": "Proposta PL"}
     dfs = []
     for nome_n, prefixo in niveis.items():
@@ -54,33 +50,32 @@ def carregar_dados():
 
 df_total = carregar_dados()
 
-# --- 4. BARRA LATERAL (PARÂMETROS) ---
-st.sidebar.header("⚙️ Configurações")
+# --- 4. BARRA LATERAL ---
+st.sidebar.header("⚙️ Parâmetros")
 vinculo = st.sidebar.radio("Situação", ["Ativo", "Aposentado/Pensionista"])
 nivel_sel = st.sidebar.selectbox("Nível", ["SUPERIOR", "INTERMEDIÁRIO", "AUXILIAR"])
 
 if df_total is not None:
     df_nivel = df_total[df_total['nivel_ref'] == nivel_sel]
     
-    # ORDEM PRIORITÁRIA DEFINIDA AQUI: 2025 -> 2026 -> PL
     cenarios_ordem = ["Vigente 2025", "Vigente 2026", "Proposta PL"]
-    cenario_foco = st.sidebar.selectbox("Cenário para Detalhamento", cenarios_ordem)
+    cenario_foco = st.sidebar.selectbox("Cenário para Detalhamento (Aba 1)", cenarios_ordem)
     
     classe_sel = st.sidebar.selectbox("Classe", sorted(df_nivel['classe'].unique(), reverse=True))
     padrao_sel = st.sidebar.selectbox("Padrão", sorted(df_nivel[df_nivel['classe'] == classe_sel]['padrao'].unique()))
 
     st.sidebar.markdown("---")
-    func = st.sidebar.number_input("Função Comissionada (R$)", min_value=0.0, step=0.01, format="%.2f")
-    saude = st.sidebar.number_input("Ressarcimento Saúde (R$)", min_value=0.0, step=0.01, format="%.2f")
+    func_input = st.sidebar.number_input("Função Comissionada (R$)", min_value=0.0, step=0.01, format="%.2f")
+    saude_input = st.sidebar.number_input("Ressarcimento Saúde (R$)", min_value=0.0, step=0.01, format="%.2f")
 
-    pre = 0.0
+    pre_input = 0.0
     if vinculo == "Ativo":
         pontos = st.sidebar.select_slider("Pontos GDAC", [80, 100], 100)
-        if st.sidebar.checkbox("Auxílio Pré-Escolar (+484,90)"): pre = 484.90
+        if st.sidebar.checkbox("Auxílio Pré-Escolar (+321,00)"): pre_input = 321.0
     else:
         pontos = 50
 
-    # --- 5. CÁLCULO DOS TRÊS MOMENTOS ---
+    # --- 5. CÁLCULO ---
     def calcular(nome_cenario):
         try:
             linha = df_nivel[(df_nivel['cenario_ref'] == nome_cenario) & 
@@ -90,70 +85,78 @@ if df_total is not None:
             gdac = linha['gdac_80'] if pontos == 80 else (linha['gdac_100'] if pontos == 100 else linha['gdac_50'])
             alim = 1175.0 if vinculo == "Ativo" else 0.0
             
-            base_irpf = vb + gdac + func
-            ir, aliq, red = calcular_irpf(base_irpf, nome_cenario)
-            bruto = vb + gdac + alim + func + pre + saude
+            # Base do IR inclui apenas VB + GDAC + FUNÇÃO
+            base_irpf = vb + gdac + func_input
+            ir_v, aliq_v, red_v = calcular_irpf(base_irpf, nome_cenario)
             
-            return {"VB": vb, "GDAC": gdac, "ALIM": alim, "FUNC": func, "PRE": pre, 
-                    "SAUDE": saude, "BRUTO": bruto, "IR": ir, "LIQ": bruto - ir, "RED": red, "ALIQ": aliq}
+            # Bruto Total
+            bruto_v = vb + gdac + alim + func_input + pre_input + saude_input
+            
+            return {"VB": vb, "GDAC": gdac, "ALIM": alim, "FUNC": func_input, "PRE": pre_input, 
+                    "SAUDE": saude_input, "BRUTO": bruto_v, "IR": ir_v, "LIQ": bruto_v - ir_v, "RED": red_v, "ALIQ": aliq_v}
         except: return None
 
     res_25 = calcular("Vigente 2025")
     res_26 = calcular("Vigente 2026")
     res_pl = calcular("Proposta PL")
 
-    # --- 6. INTERFACE COM ABAS ---
+    # --- 6. INTERFACE ---
     st.title("🏛️ Simulador Salarial MINC/IPHAN")
 
     tab1, tab2 = st.tabs(["🎯 Calculadora Individual", "⚖️ Comparativo Cronológico"])
 
     with tab1:
-        # Busca o resultado baseado na escolha da sidebar
         res = {"Vigente 2025": res_25, "Vigente 2026": res_26, "Proposta PL": res_pl}[cenario_foco]
         
         if res:
-            st.subheader(f"Visão Detalhada: {cenario_foco}")
+            st.subheader(f"Detalhamento: {cenario_foco}")
             m1, m2, m3 = st.columns(3)
-            m1.metric("Bruto", f"R$ {formatar_br(res['BRUTO'])}")
-            m2.metric("IRPF (Estimado)", f"R$ {formatar_br(res['IR'])}", 
+            m1.metric("Bruto Total", f"R$ {formatar_br(res['BRUTO'])}")
+            m2.metric("IRPF Retido", f"R$ {formatar_br(res['IR'])}", 
                       delta=f"- R$ {formatar_br(res['RED'])}" if res['RED'] > 0 else None, delta_color="inverse")
-            m3.metric("Líquido", f"R$ {formatar_br(res['LIQ'])}")
+            m3.metric("Líquido Estimado", f"R$ {formatar_br(res['LIQ'])}")
             
             st.markdown("---")
-            c_a, c_b = st.columns(2)
-            with c_a:
+            col_a, col_b = st.columns(2)
+            with col_a:
                 st.write("**Composição da Remuneração:**")
-                st.write(f"Vencimento Básico: R$ {formatar_br(res['VB'])}")
-                st.write(f"GDAC ({pontos} pts): R$ {formatar_br(res['GDAC'])}")
-                if res['ALIM'] > 0: st.write(f"Auxílio Alimentação: R$ {formatar_br(res['ALIM'])}")
-            with c_b:
+                st.write(f"Vencimento Básico: **R$ {formatar_br(res['VB'])}**")
+                st.write(f"GDAC ({pontos} pts): **R$ {formatar_br(res['GDAC'])}**")
+                if res['ALIM'] > 0:
+                    st.write(f"Auxílio Alimentação: **R$ {formatar_br(res['ALIM'])}**")
+                
+                # --- AQUI ESTAVA O PROBLEMA: ADICIONADAS AS VARIÁVEIS EXTERNAS ---
+                if res['FUNC'] > 0:
+                    st.write(f"Função Comissionada: **R$ {formatar_br(res['FUNC'])}**")
+                if res['PRE'] > 0:
+                    st.success(f"Auxílio Pré-Escolar: **R$ {formatar_br(res['PRE'])}**")
+                if res['SAUDE'] > 0:
+                    st.write(f"Ressarcimento Saúde: **R$ {formatar_br(res['SAUDE'])}**")
+
+            with col_b:
                 st.write("**Tributação:**")
-                st.write(f"Alíquota Efetiva: {res['ALIQ']}%")
-                if res['RED'] > 0: st.info(f"Redução Lei 15.270 aplicada: R$ {formatar_br(res['RED'])}")
+                st.write(f"Alíquota Aplicada: **{res['ALIQ']}%**")
+                if res['RED'] > 0:
+                    st.info(f"Redução Lei 15.270: **R$ {formatar_br(res['RED'])}**")
         else:
-            st.error("Dados não encontrados para o cenário selecionado.")
+            st.error("Dados não encontrados.")
 
     with tab2:
-        st.subheader("Evolução: 2025 → 2026 → PL")
+        st.subheader("Evolução: 2025 ➔ 2026 ➔ PL")
         if res_25 and res_26 and res_pl:
-            # Tabela organizada por colunas temporais
+            # Soma das rubricas variáveis para simplificar a tabela
+            def soma_vars(r): return r['ALIM'] + r['FUNC'] + r['PRE'] + r['SAUDE']
+            
             tabela = [
                 ["Vencimento Básico", formatar_br(res_25['VB']), formatar_br(res_26['VB']), formatar_br(res_pl['VB'])],
                 ["GDAC", formatar_br(res_25['GDAC']), formatar_br(res_26['GDAC']), formatar_br(res_pl['GDAC'])],
-                ["Função/Saúde/Auxílios", 
-                 formatar_br(res_25['ALIM']+res_25['PRE']+res_25['FUNC']+res_25['SAUDE']), 
-                 formatar_br(res_26['ALIM']+res_26['PRE']+res_26['FUNC']+res_26['SAUDE']), 
-                 formatar_br(res_pl['ALIM']+res_pl['PRE']+res_pl['FUNC']+res_pl['SAUDE'])],
+                ["Auxílios / Função / Saúde", formatar_br(soma_vars(res_25)), formatar_br(soma_vars(res_26)), formatar_br(soma_vars(res_pl))],
                 ["---", "---", "---", "---"],
                 ["TOTAL BRUTO", formatar_br(res_25['BRUTO']), formatar_br(res_26['BRUTO']), formatar_br(res_pl['BRUTO'])],
+                ["IRPF Retido", f"- {formatar_br(res_25['IR'])}", f"- {formatar_br(res_26['IR'])}", f"- {formatar_br(res_pl['IR'])}"],
                 ["LÍQUIDO FINAL", f"**{formatar_br(res_25['LIQ'])}**", f"**{formatar_br(res_26['LIQ'])}**", f"**{formatar_br(res_pl['LIQ'])}**"]
             ]
-            st.table(pd.DataFrame(tabela, columns=["Item", "Atual (2025)", "Garantido (2026)", "Proposta PL"]))
+            st.table(pd.DataFrame(tabela, columns=["Item", "Atual (2025)", "Vigente (2026)", "Proposta PL"]))
             
-            # Cálculo de ganhos
-            ganho_26 = res_26['LIQ'] - res_25['LIQ']
-            ganho_pl = res_pl['LIQ'] - res_26['LIQ']
-            
-            c1, c2 = st.columns(2)
-            c1.info(f"Ganho 2025 ➔ 2026: R$ {formatar_br(ganho_26)}")
-            c2.success(f"Impacto Adicional PL: R$ {formatar_br(ganho_pl)}")
+            ganho_total = res_pl['LIQ'] - res_25['LIQ']
+            st.success(f"📈 Ganho Acumulado (Hoje ➔ PL): **R$ {formatar_br(ganho_total)}**")
