@@ -43,7 +43,6 @@ def calcular_irpf_bruto(base_mensal):
 
 @st.cache_data
 def carregar_dados_pl():
-    # Nomes dos arquivos conforme seu repositório
     arquivos = {
         "SUPERIOR": "tabela_superior(1).csv",
         "INTERMEDIÁRIO": "tabela_intermediario(1).csv",
@@ -56,32 +55,40 @@ def carregar_dados_pl():
     for nivel, path in arquivos.items():
         if os.path.exists(path):
             try:
-                # O segredo: sep=None e engine='python' detecta se é , ou ; sozinho
-                df_raw = pd.read_csv(path, sep=None, engine='python', encoding='utf-8-sig', skiprows=1)
+                # Forçamos o separador como vírgula, que é o padrão dos seus arquivos
+                df_raw = pd.read_csv(path, sep=',', encoding='utf-8-sig', skiprows=1)
                 
+                # Se mesmo com vírgula ele ler apenas 1 coluna, tentamos ponto e vírgula
+                if df_raw.shape[1] < 5:
+                    df_raw = pd.read_csv(path, sep=';', encoding='utf-8-sig', skiprows=1)
+
+                # Verificação de segurança: se o arquivo não tiver colunas suficientes, pula ele
+                if df_raw.shape[1] < 11:
+                    st.error(f"O arquivo {path} parece estar formatado incorretamente.")
+                    continue
+
                 # Parte Esquerda (2025) - Colunas 0 a 10
                 df_25 = df_raw.iloc[:, 0:11].copy()
                 df_25.columns = colunas_padrao
                 df_25['vigencia'] = "2025"
                 df_25['nivel_data'] = nivel
                 
-                # Parte Direita (2026) - Colunas 12 a 22 (pulando a coluna vazia do meio)
+                # Parte Direita (2026) - Colunas 12 a 22
+                # Usamos .iloc para garantir que pegamos as colunas certas independente do nome
                 df_26 = df_raw.iloc[:, 12:23].copy()
                 df_26.columns = colunas_padrao
                 df_26['vigencia'] = "2026"
                 df_26['nivel_data'] = nivel
                 
                 for df in [df_25, df_26]:
-                    # Limpa as colunas financeiras
                     for col in ['vb', 'gdac_80', 'gdac_100', 'alim']:
                         df[col] = df[col].apply(limpar_valor)
                     dfs_finais.append(df)
+                    
             except Exception as e:
-                st.error(f"Erro ao ler {path}: {e}")
+                st.error(f"Erro ao processar {path}: {e}")
                 
     return pd.concat(dfs_finais, ignore_index=True) if dfs_finais else None
-
-df_pl = carregar_dados_pl()
 
 # --- INTERFACE ---
 
