@@ -9,6 +9,8 @@ Termo de Acordo nº 08/2024 - PGPE e PECs Setoriais - propostas dos servidores f
 
 Portaria MGI nº 9.888, de 6 de Novembro de 2025 - Fixa o valor mensal do auxílio-alimentação (https://www.in.gov.br/web/dou/-/portaria/mgi-n-9.888-de-6-de-novembro-de-2025-667427345)
 
-Projeto de Lei nº 5.874 de 2025 (https://legis.senado.leg.br/sdleg-getter/documento?dm=10155651&disposition=inline)
+Lei nº 15.191, de 11 de agosto de 2025 - Modifica os valores da tabela progressiva mensal do IRPF (https://www.planalto.gov.br/ccivil_03/_Ato2023-2026/2025/Lei/L15191.htm)
 
-Lei nº 15.270 de 26 de novembro de 2025 - Nova tabela do imposto de renda (https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15270.htm)
+Lei nº 15.270 de 26 de novembro de 2025 - Zera o imposto de renda até R$ 5.000,00 (https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15270.htm)
+
+Projeto de Lei nº 5.874 de 2025 (https://legis.senado.leg.br/sdleg-getter/documento?dm=10155651&disposition=inline)
