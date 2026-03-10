@@ -137,7 +137,7 @@ if df_total is not None:
     res_pl = calcular("Proposta PL 01/04/2026")
 
     # --- 6. INTERFACE (O TÍTULO DEVE FICAR AQUI) ---
-    st.title("🏛️ Simulador Salarial MINC/IPHAN")
+    st.title("🏛️ Simulador Salarial MINC")
 
     # Somente após o título nós criamos as abas
     tab1, tab2, tab3 = st.tabs(["🎯 Calculadora Individual", "⚖️ Comparativo Cronológico", "📜 Legislação Aplicada"])
