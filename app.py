@@ -236,7 +236,7 @@ if df_total is not None:
     st.markdown("---")
     st.markdown(
         "<div style='text-align: center; color: gray; font-size: 0.8em;'>"
-        "Elaborado por GT de Elaboração das Emendas e Comando Nacional de Acompanhamento"
+        "Elaborado por 🚀GT de Elaboração das Emendas🚀 e 🔥Comando Nacional de Acompanhamento🔥"
         "</div>", 
         unsafe_allow_html=True
     )
