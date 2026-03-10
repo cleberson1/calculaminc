@@ -141,7 +141,7 @@ if df_total is not None:
             # Dedução por dependentes
             deducao_dependentes = num_dependentes_ir * 189.59
 
-            # Base tributável do IR
+            # Base IRPF correta (abatendo PSS)
             base_irpf = max(0, (vb + gdac + func_input) - pss_v - deducao_dependentes)
 
             ir_v, aliq_v, red_v = calcular_irpf(base_irpf, nome_cenario)
