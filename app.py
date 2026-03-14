@@ -207,8 +207,13 @@ if df_total is not None:
                 ["LÍQUIDO FINAL", f"**{formatar_br(res_25['LIQ'])}**", f"**{formatar_br(res_26['LIQ'])}**", f"**{formatar_br(res_pl['LIQ'])}**"]
             ]
             st.table(pd.DataFrame(tabela, columns=["Item", "01/01/2025", "01/04/2026", "PL 01/04/2026"]))
-            st.success(f"📈 Ganho Líquido Acumulado (Hoje ➔ PL): **R$ {formatar_br(res_pl['LIQ'] - res_25['LIQ'])}**")
-
+            ganho = res_pl['LIQ'] - res_25['LIQ']
+            perc = (ganho / res_25['LIQ']) * 100 if res_25['LIQ'] != 0 else 0
+            st.success(
+                f"📈 Ganho Líquido Acumulado (Hoje ➔ PL): "
+                f"**R$ {formatar_br(ganho)} ({perc:.2f}%)**"
+            )
+            
     with tab3:
         st.subheader("Base Normativa e Referências Legais")
         legislação = [
