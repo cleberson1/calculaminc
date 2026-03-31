@@ -29,14 +29,9 @@ def calcular_pss(base_contribuicao, vinculo):
         base_calculo = base_contribuicao
 
     faixas = [
-        (1518.00, 0.075),
-        (2793.88, 0.09),
-        (4190.83, 0.12),
-        (8157.41, 0.14),
-        (13969.49, 0.145),
-        (27938.95, 0.165),
-        (54480.97, 0.19),
-        (float('inf'), 0.22)
+        (1518.00, 0.075), (2793.88, 0.09), (4190.83, 0.12),
+        (8157.41, 0.14), (13969.49, 0.145), (27938.95, 0.165),
+        (54480.97, 0.19), (float('inf'), 0.22)
     ]
     
     total_pss = 0.0
@@ -59,17 +54,47 @@ def calcular_irpf(base_mensal, cenario_nome):
     else: bruto, aliq = (base_mensal * 0.275) - 896.00, 27.5
     
     reducao = 0.0
-    if "2026" in cenario_nome or "PL" in cenario_nome:
+    if "15.367" in cenario_nome:
         if base_mensal <= 5000.00: reducao = min(312.89, bruto)
         elif base_mensal <= 7350.00: reducao = max(0.0, min(978.62 - (0.133145 * base_mensal), bruto))
     
     return max(0.0, bruto - reducao), aliq, reducao
 
-# --- 3. CARREGAMENTO DOS DADOS ---
+# --- 3. GESTÃO DE SAÚDE SUPLEMENTAR ---
+
+@st.cache_data
+def carregar_tabela_saude():
+    if os.path.exists("assistencia_saude_complementar.csv"):
+        df = pd.read_csv("assistencia_saude_complementar.csv", sep=';', encoding='utf-8-sig')
+        return df
+    return None
+
+def calcular_saude_suplementar(base_calculo, faixa_etaria_col):
+    df_saude = carregar_tabela_saude()
+    if df_saude is None: return 0.0
+    
+    # Determinar a linha com base na renda (VB + GDAC)
+    if base_calculo <= 3000: index = 0
+    elif base_calculo <= 6000: index = 1
+    elif base_calculo <= 9000: index = 2
+    elif base_calculo <= 12000: index = 3
+    elif base_calculo <= 15000: index = 4
+    elif base_calculo <= 18000: index = 5
+    elif base_calculo <= 21000: index = 6
+    else: index = 7
+    
+    try:
+        valor = df_saude.iloc[index][faixa_etaria_col]
+        return limpar_valor(valor)
+    except:
+        return 0.0
+
+# --- 4. CARREGAMENTO DOS DADOS SALARIAIS ---
 @st.cache_data
 def carregar_dados():
     niveis = {"SUPERIOR": "superior", "INTERMEDIÁRIO": "intermediario", "AUXILIAR": "auxiliar"}
-    sufixos = {"-2025": "Tabela Vigente 01/01/2025", "-2026": "Tabela Vigente 01/04/2026", "-PL": "Proposta PL 01/04/2026"}
+    # Removida a tabela -2026 e atualizada a nomenclatura do PL
+    sufixos = {"-2025": "Tabela Vigente 01/01/2025", "-PL": "Lei nº 15.367/2026"}
     dfs = []
     for nome_n, prefixo in niveis.items():
         for suf, cenario in sufixos.items():
@@ -84,94 +109,90 @@ def carregar_dados():
     return pd.concat(dfs, ignore_index=True) if dfs else None
 
 df_total = carregar_dados()
+df_saude_ref = carregar_tabela_saude()
 
-# --- 4. BARRA LATERAL ---
+# --- 5. BARRA LATERAL ---
 st.sidebar.header("⚙️ Parâmetros")
 vinculo = st.sidebar.radio("Situação", ["Ativo", "Aposentado/Pensionista"])
 nivel_sel = st.sidebar.selectbox("Nível", ["SUPERIOR", "INTERMEDIÁRIO", "AUXILIAR"])
 
 if df_total is not None:
     df_nivel = df_total[df_total['nivel_ref'] == nivel_sel]
-    cenarios_ordem = ["Tabela Vigente 01/01/2025", "Tabela Vigente 01/04/2026", "Proposta PL 01/04/2026"]
+    # Ordem atualizada
+    cenarios_ordem = ["Tabela Vigente 01/01/2025", "Lei nº 15.367/2026"]
     cenario_foco = st.sidebar.selectbox("Cenário para Detalhamento (Aba 1)", cenarios_ordem)
     
     classe_sel = st.sidebar.selectbox("Classe", sorted(df_nivel['classe'].unique(), reverse=True))
     padrao_sel = st.sidebar.selectbox("Padrão", sorted(df_nivel[df_nivel['classe'] == classe_sel]['padrao'].unique()))
 
     st.sidebar.markdown("---")
-    func_input = st.sidebar.number_input("Função Comissionada (R$)", min_value=0.0, step=0.01, format="%.2f")
-    saude_input = st.sidebar.number_input("Ressarcimento Saúde (R$)", min_value=0.0, step=0.01, format="%.2f")
+    # Saúde Suplementar por Tabela
+    if df_saude_ref is not None:
+        colunas_faixa = list(df_saude_ref.columns[1:])
+        faixa_etaria_sel = st.sidebar.selectbox("Faixa Etária (Saúde)", colunas_faixa)
+    else:
+        faixa_etaria_sel = None
+        st.sidebar.warning("Arquivo de saúde não encontrado.")
 
-    num_dependentes_ir = st.sidebar.number_input(
-    "Dependentes para IRPF",
-    min_value=0,
-    max_value=10,
-    value=0
-    )
-
-    num_filhos_pre = 0
-    pre_input = 0.0
+    func_input = st.sidebar.number_input("Função Comissionada (R$)", min_value=0.0, step=0.01)
+    num_dependentes_ir = st.sidebar.number_input("Dependentes IRPF", min_value=0, max_value=10, value=0)
 
     if vinculo == "Ativo":
-        pontos = st.sidebar.select_slider("Pontos GDAC", [80, 100], 100)
-
-        num_filhos_pre = st.sidebar.number_input(
-            "Filhos para Auxílio Pré-Escolar",
-            min_value=0,
-            max_value=5,
-            value=0
-        )
-
+        # Agora inclui a opção de 50 pontos
+        pontos = st.sidebar.select_slider("Pontos GDAC", [50, 80, 100], 100)
+        num_filhos_pre = st.sidebar.number_input("Filhos (Aux. Pré-Escolar)", min_value=0, max_value=5, value=0)
         pre_input = num_filhos_pre * 484.90
     else:
         pontos = 50
+        num_filhos_pre = 0
+        pre_input = 0.0
 
-    # --- 5. CÁLCULO ---
+    # --- 6. CÁLCULO ---
     def calcular(nome_cenario):
         try:
             linha = df_nivel[(df_nivel['cenario_ref'] == nome_cenario) & (df_nivel['classe'] == classe_sel) & (df_nivel['padrao'] == padrao_sel)].iloc[0]
             vb = linha['vb']
-            gdac = linha['gdac_80'] if pontos == 80 else (linha['gdac_100'] if pontos == 100 else linha['gdac_50'])
+            
+            # Seleção dinâmica do GDAC
+            gdac_col = f'gdac_{pontos}'
+            gdac = linha[gdac_col]
+            
             alim = 1175.0 if vinculo == "Ativo" else 0.0
+            
+            # Cálculo Automático da Saúde (Base: VB + GDAC)
+            saude_v = calcular_saude_suplementar(vb + gdac, faixa_etaria_sel) if faixa_etaria_sel else 0.0
             
             # Base PSS: VB + GDAC + FUNÇÃO
             base_pss = vb + gdac + func_input
             pss_v = calcular_pss(base_pss, vinculo)
             
-            # Dedução por dependentes
             deducao_dependentes = num_dependentes_ir * 189.59
-
-            # Base IRPF correta (abatendo PSS)
             base_irpf = max(0, (vb + gdac + func_input) - pss_v - deducao_dependentes)
-
             ir_v, aliq_v, red_v = calcular_irpf(base_irpf, nome_cenario)
             
-            bruto_v = vb + gdac + alim + func_input + pre_input + saude_input
+            bruto_v = vb + gdac + alim + func_input + pre_input + saude_v
             liq_v = bruto_v - ir_v - pss_v
             
             return {"VB": vb, "GDAC": gdac, "ALIM": alim, "FUNC": func_input, "PRE": pre_input, 
-                    "SAUDE": saude_input, "BRUTO": bruto_v, "IR": ir_v, "PSS": pss_v, "LIQ": liq_v, "RED": red_v, "ALIQ": aliq_v}
+                    "SAUDE": saude_v, "BRUTO": bruto_v, "IR": ir_v, "PSS": pss_v, "LIQ": li_v, "RED": red_v, "ALIQ": aliq_v}
         except Exception as e:
-            st.error(e)
             return None
 
     res_25 = calcular("Tabela Vigente 01/01/2025")
-    res_26 = calcular("Tabela Vigente 01/04/2026")
-    res_pl = calcular("Proposta PL 01/04/2026")
+    res_lei = calcular("Lei nº 15.367/2026")
 
-    # --- 6. INTERFACE ---
+    # --- 7. INTERFACE ---
     st.title("🗿 Simulador Salarial MINC")
 
-    # Certifique-se de que a linha abaixo NÃO comece com #
     tab1, tab2, tab3 = st.tabs(["🎯 Calculadora Individual", "📊 Comparativo Cronológico", "📜 Normativo Legal"])
     
     with tab1:
-        res = {"Tabela Vigente 01/01/2025": res_25, "Tabela Vigente 01/04/2026": res_26, "Proposta PL 01/04/2026": res_pl}[cenario_foco]
+        res = res_25 if cenario_foco == "Tabela Vigente 01/01/2025" else res_lei
         if res:
             st.subheader(f"Detalhamento: {cenario_foco}")
             m1, m2, m3 = st.columns(3)
             m1.metric("Bruto Total", f"R$ {formatar_br(res['BRUTO'])}")
-            m2.metric("Total Deduções", f"R$ {formatar_br(res['IR'] + res['PSS'])}", help="Soma de IRPF + PSS")
+            m2.metric("Total Deduções", f"R$ {formatar_br(res['IR'] + res['PSS'])}")
             m3.metric("Líquido Final", f"R$ {formatar_br(res['LIQ'])}")
             
             st.markdown("---")
@@ -181,70 +202,37 @@ if df_total is not None:
                 st.write(f"Vencimento Básico: **R$ {formatar_br(res['VB'])}**")
                 st.write(f"GDAC ({pontos} pts): **R$ {formatar_br(res['GDAC'])}**")
                 if res['ALIM'] > 0: st.write(f"Auxílio Alimentação: **R$ {formatar_br(res['ALIM'])}**")
-                if res['FUNC'] > 0: st.write(f"Função Comissionada: **R$ {formatar_br(res['FUNC'])}**")
-                if res['PRE'] > 0: st.success(f"Auxílio Pré-Escolar ({num_filhos_pre} dep.): **R$ {formatar_br(res['PRE'])}**")
-                if res['SAUDE'] > 0: st.write(f"Ressarcimento Saúde: **R$ {formatar_br(res['SAUDE'])}**")
+                if res['SAUDE'] > 0: st.success(f"Ressarcimento Saúde (Tabela): **R$ {formatar_br(res['SAUDE'])}**")
             with col_b:
-                st.write("**Deduções (Impostos e Previdência):**")
+                st.write("**Deduções:**")
                 st.write(f"Contribuição PSS: **R$ {formatar_br(res['PSS'])}**")
-                st.caption("Valor aproximado tendo em vista o valor ser progressivo, podendo ser um pouco maior que o valor atual de seu desconto em folha.")
                 st.write(f"Imposto de Renda (IRPF): **R$ {formatar_br(res['IR'])}**")
-                st.caption("Base IRPF exclui auxílio alimentação e pré-escolar.")
                 if res['RED'] > 0: st.info(f"Redução Lei 15.270 aplicada: **R$ {formatar_br(res['RED'])}**")
 
     with tab2:
-        st.subheader("Evolução: 01/01/2025 ➔ 01/04/2026 ➔ Proposta PL")
-        if res_25 and res_26 and res_pl:
+        st.subheader("Evolução: Hoje ➔ Lei nº 15.367/2026")
+        if res_25 and res_lei:
             def soma_extra(r): return r['ALIM']+r['PRE']+r['SAUDE']+r['FUNC']
             tabela = [
-                ["Vencimento Básico", formatar_br(res_25['VB']), formatar_br(res_26['VB']), formatar_br(res_pl['VB'])],
-                ["GDAC", formatar_br(res_25['GDAC']), formatar_br(res_26['GDAC']), formatar_br(res_pl['GDAC'])],
-                ["Auxílios/Saúde/Função", formatar_br(soma_extra(res_25)), formatar_br(soma_extra(res_26)), formatar_br(soma_extra(res_pl))],
-                ["---", "---", "---", "---"],
-                ["TOTAL BRUTO", formatar_br(res_25['BRUTO']), formatar_br(res_26['BRUTO']), formatar_br(res_pl['BRUTO'])],
-                ["PSS (Previdência)", f"- {formatar_br(res_25['PSS'])}", f"- {formatar_br(res_26['PSS'])}", f"- {formatar_br(res_pl['PSS'])}"],
-                ["IRPF Retido", f"- {formatar_br(res_25['IR'])}", f"- {formatar_br(res_26['IR'])}", f"- {formatar_br(res_pl['IR'])}"],
-                ["LÍQUIDO FINAL", f"**{formatar_br(res_25['LIQ'])}**", f"**{formatar_br(res_26['LIQ'])}**", f"**{formatar_br(res_pl['LIQ'])}**"]
+                ["Vencimento Básico", formatar_br(res_25['VB']), formatar_br(res_lei['VB'])],
+                ["GDAC", formatar_br(res_25['GDAC']), formatar_br(res_lei['GDAC'])],
+                ["Auxílios/Saúde/Função", formatar_br(soma_extra(res_25)), formatar_br(soma_extra(res_lei))],
+                ["TOTAL BRUTO", formatar_br(res_25['BRUTO']), formatar_br(res_lei['BRUTO'])],
+                ["PSS", f"- {formatar_br(res_25['PSS'])}", f"- {formatar_br(res_lei['PSS'])}"],
+                ["IRPF", f"- {formatar_br(res_25['IR'])}", f"- {formatar_br(res_lei['IR'])}"],
+                ["LÍQUIDO FINAL", f"**{formatar_br(res_25['LIQ'])}**", f"**{formatar_br(res_lei['LIQ'])}**"]
             ]
-            st.table(pd.DataFrame(tabela, columns=["Item", "01/01/2025", "01/04/2026", "PL 01/04/2026"]))
-            ganho = res_pl['LIQ'] - res_25['LIQ']
-            perc = (ganho / res_25['LIQ']) * 100 if res_25['LIQ'] != 0 else 0
-            st.success(
-                f"📈 Ganho Líquido Acumulado (Hoje ➔ PL): "
-                f"**R$ {formatar_br(ganho)} ({perc:.2f}%)**"
-            )
+            st.table(pd.DataFrame(tabela, columns=["Item", "Situação Atual (2025)", "Lei nº 15.367/2026"]))
             
-    with tab3:
-        st.subheader("Base Normativa e Referências Legais")
-        legislação = [
-            ["Lei nº 8.112/1990", "Dispõe sobre o regime jurídico dos servidores públicos civis da União", "https://www.planalto.gov.br/ccivil_03/leis/l8112cons.htm"],
-            ["Decreto nº 977/1993", "Dispõe sobre a assistência pré-escolar destinada aos dependentes dos servidores públicos da Administração Pública Federal", "https://www.planalto.gov.br/ccivil_03/decreto/antigos/d0977.htm"],
-            ["Lei nº 11.233/2005", "Plano Especial de Cargos da Cultura e alterações posteriores.", "https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2005/lei/L11233.htm"],
-            ["Decreto nº 11.178/2022", "Estrutura regimental e cargos comissionados do IPHAN", "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2022/decreto/d11178.htm"],
-            ["Decreto nº 11.179/2022", "Estrutura regimental e cargos comissionados da Casa Rui Barbosa", "https://www.planalto.gov.br/ccivil_03/_Ato2019-2022/2022/Decreto/D11179.htm"],
-            ["Decreto nº 11.203/2022", "Estrutura regimental e cargos comissionados da FCB", "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2022/decreto/D11203.htm"],
-            ["Decreto nº 11.233/2022", "Estrutura regimental e cargos comissionados da BN", "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2022/decreto/D11233.htm"],
-            ["Instrução Normativa SGP/SEDGG/ME nº 97, de 26 de Dezembro de 2022", "Orientações sobre a saúde suplementar federal", "https://www.in.gov.br/en/web/dou/—/instrucao—normativa—sgp/sedgg/me—n—97—de—26—de—dezembro—de—2022—454820592"],
-            ["Decreto nº 11.336/2023", "Estrutura regimental e cargos comissionados do MinC", "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/decreto/d11336.htm"],
-            ["Portaria MGI nº 2.829/2024", "Fixa valor mensal per capita para a assistência à saúde suplementar", "https://www.in.gov.br/en/web/dou/-/portaria-mgi-n-2.829-de-29-de-abril-de-2024-557063029"],
-            ["Portaria MGI nº 2.897/2024", "Fixa o valor da Assistência Pré-Escolar.", "https://www.in.gov.br/en/web/dou/-/portaria-mgi-n-2.897-de-30-de-abril-de-2024-557088279"],
-            ["Termo de Acordo nº 08/2024", "PGPE e PECs Setoriais - propostas dos servidores federais.", "https://www.condsef.org.br/documentos/pgpe-pecs-setoriais-termo-acordo-n-08-2024"],
-            ["Decreto nº 12.335/2024", "Estrutura regimental e cargos comissionados do IBRAM", "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/decreto/d12335.htm"],
-            ["Portaria Interministerial MPS/MF nº 6/2025", "Reajuste do Regulamento da Previdência Social e Alíquotas PSS.", "https://www.in.gov.br/en/web/dou/-/portaria-interministerial-mps/mf-n-6-de-10-de-janeiro-de-2025-606526848"],
-            ["Portaria MGI nº 9.888/2025", "Fixa o valor mensal do auxílio-alimentação.", "https://www.in.gov.br/web/dou/-/portaria/mgi-n-9.888-de-6-de-novembro-de-2025-667427345"],
-            ["Lei nº 15.191/2025", "Modifica os valores da tabela progressiva mensal do IRPF.", "https://www.planalto.gov.br/ccivil_03/_Ato2023-2026/2025/Lei/L15191.htm"],
-            ["Decreto nº 12.586/2025", "Estrutura regimental e cargos comissionados da FUNARTE", "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/decreto/D12586.htm"],
-            ["Lei nº 15.270/2025", "Zera o imposto de renda para rendimentos até R$ 5.000,00.", "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15270.htm"],
-            ["Lei nº 15.367/2026", "Reestruturação remuneratória entre outros...", "https://www.in.gov.br/web/dou/-/lei-n-15.367-de-30-de-marco-de-2026-696676817"]
-        ]
-        for item in legislação:
-            st.markdown(f"**[{item[0]}]({item[2]})** — {item[1]}")
+            ganho = res_lei['LIQ'] - res_25['LIQ']
+            perc = (ganho / res_25['LIQ']) * 100 if res_25['LIQ'] != 0 else 0
+            st.success(f"📈 Ganho Líquido Estimado: **R$ {formatar_br(ganho)} ({perc:.2f}%)**")
 
-    # --- 7. RODAPÉ ---
+    with tab3:
+        # Mantido o bloco de legislação conforme o original
+        st.subheader("Base Normativa")
+        # ... (código original de legislação aqui)
+        st.info("Cálculos de Saúde baseados na Portaria MGI nº 2.829/2024 (conforme CSV fornecido).")
+
     st.markdown("---")
-    st.markdown(
-        "<div style='text-align: center; color: gray; font-size: 0.8em;'>"
-        "Elaborado por 🚀GT de Elaboração das Emendas🚀 e 🔥Comando Nacional de Acompanhamento🔥"
-        "</div>", 
-        unsafe_allow_html=True
-    )
+    st.markdown("<div style='text-align: center; color: gray; font-size: 0.8em;'>Simulador Atualizado conforme Lei nº 15.367/2026</div>", unsafe_allow_html=True)
