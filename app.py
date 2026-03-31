@@ -56,13 +56,11 @@ def calcular_irpf(base_mensal, cenario_nome):
 @st.cache_data
 def carregar_tabela_saude():
     if os.path.exists("assistencia_saude_complementar.csv"):
-        # Já que você converteu para UTF-8, usamos utf-8 direto
         return pd.read_csv("assistencia_saude_complementar.csv", sep=';', encoding='utf-8')
     return None
 
 def obter_valor_saude(base_calculo, faixa_etaria_col, df_saude):
     if df_saude is None or not faixa_etaria_col: return 0.0
-    # Lógica de faixas de renda baseada no CSV
     if base_calculo <= 3000: idx = 0
     elif base_calculo <= 6000: idx = 1
     elif base_calculo <= 9000: idx = 2
@@ -105,11 +103,16 @@ if df_total is not None:
     padrao_sel = st.sidebar.selectbox("Padrão", sorted(df_nivel[df_nivel['classe'] == classe_sel]['padrao'].unique()))
 
     st.sidebar.markdown("---")
-    # Seleção de Saúde Suplementar
-    faixa_etaria_sel = None
-    if df_saude_ref is not None:
-        faixa_etaria_sel = st.sidebar.selectbox("Sua Faixa Etária (Saúde)", df_saude_ref.columns[1:])
     
+    # --- NOVO BOTÃO PARA SAÚDE ---
+    usar_saude = st.sidebar.toggle("Recebe Saúde Suplementar?", value=False)
+    faixa_etaria_sel = None
+    if usar_saude and df_saude_ref is not None:
+        faixa_etaria_sel = st.sidebar.selectbox("Sua Faixa Etária (Saúde)", df_saude_ref.columns[1:])
+    elif usar_saude:
+        st.sidebar.warning("Arquivo de saúde não encontrado.")
+    
+    st.sidebar.markdown("---")
     func_input = st.sidebar.number_input("Função Comissionada (R$)", min_value=0.0, step=0.01)
     dep_ir = st.sidebar.number_input("Dependentes IRPF", min_value=0, max_value=10)
 
@@ -129,7 +132,9 @@ if df_total is not None:
             
             vb = linha['vb']
             gdac = linha[f'gdac_{pontos}']
-            saude = obter_valor_saude(vb + gdac, faixa_etaria_sel, df_saude_ref)
+            
+            # Saúde calculada apenas se o botão estiver ativo
+            saude = obter_valor_saude(vb + gdac, faixa_etaria_sel, df_saude_ref) if usar_saude else 0.0
             
             base_pss = vb + gdac + func_input
             pss = calcular_pss(base_pss, vinculo)
@@ -163,6 +168,7 @@ if df_total is not None:
                 st.write(f"Vencimento Básico: R$ {formatar_br(res['VB'])}")
                 st.write(f"GDAC ({pontos} pts): R$ {formatar_br(res['GDAC'])}")
                 if res['SAUDE'] > 0: st.success(f"Saúde Suplementar: R$ {formatar_br(res['SAUDE'])}")
+                if res['ALIM'] > 0: st.write(f"Auxílio Alimentação: R$ {formatar_br(res['ALIM'])}")
             with col_r:
                 st.write("**Deduções:**")
                 st.write(f"Previdência (PSS): R$ {formatar_br(res['PSS'])}")
@@ -174,8 +180,8 @@ if df_total is not None:
             st.subheader("Evolução Salarial")
             dados_comp = {
                 "Item": ["Vencimento Básico", "GDAC", "Auxílios/Saúde", "TOTAL BRUTO", "PSS", "IRPF", "LÍQUIDO"],
-                "Atual (2025)": [formatar_br(res_25['VB']), formatar_br(res_25['GDAC']), formatar_br(res_25['ALIM']+res_25['SAUDE']), formatar_br(res_25['BRUTO']), f"-{formatar_br(res_25['PSS'])}", f"-{formatar_br(res_25['IR'])}", f"**{formatar_br(res_25['LIQ'])}**"],
-                "Lei 15.367/26": [formatar_br(res_26['VB']), formatar_br(res_26['GDAC']), formatar_br(res_26['ALIM']+res_26['SAUDE']), formatar_br(res_26['BRUTO']), f"-{formatar_br(res_26['PSS'])}", f"-{formatar_br(res_26['IR'])}", f"**{formatar_br(res_26['LIQ'])}**"]
+                "Atual (2025)": [formatar_br(res_25['VB']), formatar_br(res_25['GDAC']), formatar_br(res_25['ALIM']+res_25['SAUDE']+res_25['PRE']), formatar_br(res_25['BRUTO']), f"-{formatar_br(res_25['PSS'])}", f"-{formatar_br(res_25['IR'])}", f"**{formatar_br(res_25['LIQ'])}**"],
+                "Lei 15.367/26": [formatar_br(res_26['VB']), formatar_br(res_26['GDAC']), formatar_br(res_26['ALIM']+res_26['SAUDE']+res_26['PRE']), formatar_br(res_26['BRUTO']), f"-{formatar_br(res_26['PSS'])}", f"-{formatar_br(res_26['IR'])}", f"**{formatar_br(res_26['LIQ'])}**"]
             }
             st.table(pd.DataFrame(dados_comp))
             ganho = res_26['LIQ'] - res_25['LIQ']
