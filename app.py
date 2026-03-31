@@ -217,15 +217,18 @@ if df_total is not None:
     with tab3:
         st.subheader("Base Normativa e Referências Legais")
         legislação = [
+            ["Lei nº 8.112/1990", "Dispõe sobre o regime jurídico dos servidores públicos civis da União", "https://www.planalto.gov.br/ccivil_03/leis/l8112cons.htm"],
             ["Decreto nº 977/1993", "Dispõe sobre a assistência pré-escolar destinada aos dependentes dos servidores públicos da Administração Pública Federal", "https://www.planalto.gov.br/ccivil_03/decreto/antigos/d0977.htm"],
             ["Lei nº 11.233/2005", "Plano Especial de Cargos da Cultura e alterações posteriores.", "https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2005/lei/L11233.htm"],
             ["Decreto nº 11.178/2022", "Estrutura regimental e cargos comissionados do IPHAN", "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2022/decreto/d11178.htm"],
             ["Decreto nº 11.179/2022", "Estrutura regimental e cargos comissionados da Casa Rui Barbosa", "https://www.planalto.gov.br/ccivil_03/_Ato2019-2022/2022/Decreto/D11179.htm"],
             ["Decreto nº 11.203/2022", "Estrutura regimental e cargos comissionados da FCB", "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2022/decreto/D11203.htm"],
             ["Decreto nº 11.233/2022", "Estrutura regimental e cargos comissionados da BN", "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2022/decreto/D11233.htm"],
+            ["Instrução Normativa SGP/SEDGG/ME nº 97, de 26 de Dezembro de 2022", "Orientações sobre a saúde suplementar federal", "https://www.in.gov.br/en/web/dou/—/instrucao—normativa—sgp/sedgg/me—n—97—de—26—de—dezembro—de—2022—454820592"],
             ["Decreto nº 11.336/2023", "Estrutura regimental e cargos comissionados do MinC", "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/decreto/d11336.htm"],
             ["Portaria MGI nº 2.897/2024", "Fixa o valor da Assistência Pré-Escolar.", "https://www.in.gov.br/en/web/dou/-/portaria-mgi-n-2.897-de-30-de-abril-de-2024-557088279"],
             ["Termo de Acordo nº 08/2024", "PGPE e PECs Setoriais - propostas dos servidores federais.", "https://www.condsef.org.br/documentos/pgpe-pecs-setoriais-termo-acordo-n-08-2024"],
+            ["Portaria MGI nº 2.829/2024", "Fixa valor mensal per capita para a assistência à saúde suplementar", "https://www.in.gov.br/en/web/dou/-/portaria-mgi-n-2.829-de-29-de-abril-de-2024-557063029"],
             ["Decreto nº 12.335/2024", "Estrutura regimental e cargos comissionados do IBRAM", "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/decreto/d12335.htm"],
             ["Portaria Interministerial MPS/MF nº 6/2025", "Reajuste do Regulamento da Previdência Social e Alíquotas PSS.", "https://www.in.gov.br/en/web/dou/-/portaria-interministerial-mps/mf-n-6-de-10-de-janeiro-de-2025-606526848"],
             ["Portaria MGI nº 9.888/2025", "Fixa o valor mensal do auxílio-alimentação.", "https://www.in.gov.br/web/dou/-/portaria/mgi-n-9.888-de-6-de-novembro-de-2025-667427345"],
