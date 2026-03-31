@@ -167,22 +167,24 @@ if df_total is not None:
                 st.write("**Remuneração:**")
                 st.write(f"Vencimento Básico: R$ {formatar_br(res['VB'])}")
                 st.write(f"GDAC ({pontos} pts): R$ {formatar_br(res['GDAC'])}")
+                
+                # Itens extras que você solicitou:
                 if res['FUNC'] > 0:
                     st.write(f"Função Comissionada: R$ {formatar_br(res['FUNC'])}")
-                
                 if res['ALIM'] > 0:
                     st.write(f"Auxílio Alimentação: R$ {formatar_br(res['ALIM'])}")
-                
                 if res['PRE'] > 0:
                     st.write(f"Auxílio Pré-Escolar: R$ {formatar_br(res['PRE'])}")
-                
                 if res['SAUDE'] > 0:
                     st.success(f"Saúde Suplementar: R$ {formatar_br(res['SAUDE'])}")
-                with col_r:
+
+            with col_r:
+                # O ERRO ESTAVA AQUI: certifique-se de que as linhas abaixo tenham recuo
                 st.write("**Deduções:**")
                 st.write(f"Previdência (PSS): R$ {formatar_br(res['PSS'])}")
                 st.write(f"Imposto de Renda: R$ {formatar_br(res['IR'])}")
-                if res['RED'] > 0: st.info(f"Redução Lei 15.270/25: R$ {formatar_br(res['RED'])}")
+                if res['RED'] > 0:
+                    st.info(f"Redução Lei 15.270/25: R$ {formatar_br(res['RED'])}")
 
     with t2:
         if res_25 and res_26:
