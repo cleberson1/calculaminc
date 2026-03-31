@@ -179,7 +179,7 @@ if df_total is not None:
         if res_25 and res_26:
             st.subheader("Evolução Salarial")
             dados_comp = {
-                "Item": ["Vencimento Básico", "GDAC", "Auxílios/Saúde", "TOTAL BRUTO", "PSS", "IRPF", "LÍQUIDO"],
+                "Item": ["Vencimento Básico", "GDAC", "Auxílios/Saúde/Função", "TOTAL BRUTO", "PSS", "IRPF", "LÍQUIDO FINAL"],
                 "Atual (2025)": [formatar_br(res_25['VB']), formatar_br(res_25['GDAC']), formatar_br(res_25['ALIM']+res_25['SAUDE']+res_25['PRE']), formatar_br(res_25['BRUTO']), f"-{formatar_br(res_25['PSS'])}", f"-{formatar_br(res_25['IR'])}", f"**{formatar_br(res_25['LIQ'])}**"],
                 "Lei 15.367/26": [formatar_br(res_26['VB']), formatar_br(res_26['GDAC']), formatar_br(res_26['ALIM']+res_26['SAUDE']+res_26['PRE']), formatar_br(res_26['BRUTO']), f"-{formatar_br(res_26['PSS'])}", f"-{formatar_br(res_26['IR'])}", f"**{formatar_br(res_26['LIQ'])}**"]
             }
