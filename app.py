@@ -64,9 +64,19 @@ def calcular_irpf(base_mensal, cenario_nome):
 
 @st.cache_data
 def carregar_tabela_saude():
-    if os.path.exists("assistencia_saude_complementar.csv"):
-        df = pd.read_csv("assistencia_saude_complementar.csv", sep=';', encoding='utf-8-sig')
-        return df
+    caminho = "assistencia_saude_complementar.csv"
+    if os.path.exists(caminho):
+        try:
+            # Tenta ler com latin-1, que é o padrão comum de CSVs brasileiros vindos do Excel
+            df = pd.read_csv(caminho, sep=';', encoding='latin-1')
+            return df
+        except UnicodeDecodeError:
+            # Caso o latin-1 falhe, tenta o utf-8 padrão como fallback
+            df = pd.read_csv(caminho, sep=';', encoding='utf-8')
+            return df
+        except Exception as e:
+            st.error(f"Erro ao ler arquivo de saúde: {e}")
+            return None
     return None
 
 def calcular_saude_suplementar(base_calculo, faixa_etaria_col):
