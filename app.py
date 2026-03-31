@@ -167,9 +167,18 @@ if df_total is not None:
                 st.write("**Remuneração:**")
                 st.write(f"Vencimento Básico: R$ {formatar_br(res['VB'])}")
                 st.write(f"GDAC ({pontos} pts): R$ {formatar_br(res['GDAC'])}")
-                if res['SAUDE'] > 0: st.success(f"Saúde Suplementar: R$ {formatar_br(res['SAUDE'])}")
-                if res['ALIM'] > 0: st.write(f"Auxílio Alimentação: R$ {formatar_br(res['ALIM'])}")
-            with col_r:
+                if res['FUNC'] > 0:
+                    st.write(f"Função Comissionada: R$ {formatar_br(res['FUNC'])}")
+                
+                if res['ALIM'] > 0:
+                    st.write(f"Auxílio Alimentação: R$ {formatar_br(res['ALIM'])}")
+                
+                if res['PRE'] > 0:
+                    st.write(f"Auxílio Pré-Escolar: R$ {formatar_br(res['PRE'])}")
+                
+                if res['SAUDE'] > 0:
+                    st.success(f"Saúde Suplementar: R$ {formatar_br(res['SAUDE'])}")
+                with col_r:
                 st.write("**Deduções:**")
                 st.write(f"Previdência (PSS): R$ {formatar_br(res['PSS'])}")
                 st.write(f"Imposto de Renda: R$ {formatar_br(res['IR'])}")
