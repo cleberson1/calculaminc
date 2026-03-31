@@ -21,7 +21,7 @@ Decreto nº 11.336, de 1º de Janeiro de 2023 — Estrutura regimental e cargos 
 
 Portaria MGI nº 2.829, de 29 de Abril de 2024 — Fixa valor mensal per capita para a assistência à saúde suplementar (https://www.in.gov.br/en/web/dou/-/portaria-mgi-n-2.829-de-29-de-abril-de-2024-557063029)
 
-Portaria MGI nº 2.897, de 30 de Abril de 2024 — Fixa o valor da Assistência Pré—Escolar (https://www.in.gov.br/en/web/dou/—/portaria—mgi—n—2.897—de—30—de—abril—de—2024—557088279)
+Portaria MGI nº 2.897, de 30 de Abril de 2024 — Fixa o valor da Assistência Pré—Escolar (https://www.in.gov.br/en/web/dou/-/portaria-mgi-n-2.829-de-29-de-abril-de-2024-557063029)
 
 Termo de Acordo nº 08/2024 — PGPE e PECs Setoriais — propostas dos servidores federais, em 17/06/2024 (https://www.condsef.org.br/documentos/pgpe—pecs—setoriais—termo—acordo—n—08—2024)
 
@@ -33,7 +33,7 @@ Lei nº 15.191, de 11 de Agosto de 2025 — Modifica os valores da tabela progre
 
 Decreto nº 12.586, de 12 de Agosto de 2025 — Estrutura regimental e cargos comissionados da FUNARTE (https://www.planalto.gov.br/ccivil_03/_ato2023—2026/2025/decreto/D12586.htm)
 
-Portaria MGI nº 9.888, de 6 de Novembro de 2025 — Fixa o valor mensal do auxílio—alimentação (https://www.in.gov.br/web/dou/—/portaria/mgi—n—9.888—de—6—de—novembro—de—2025—667427345)
+Portaria MGI nº 9.888, de 6 de Novembro de 2025 — Fixa o valor mensal do auxílio—alimentação (https://www.in.gov.br/web/dou/-/portaria/mgi-n-9.888-de-6-de-novembro-de-2025-667427345)
 
 Lei nº 15.270 de 26 de Novembro de 2025 — Zera o imposto de renda até R$ 5.000,00 (https://www.planalto.gov.br/ccivil_03/_ato2023—2026/2025/lei/l15270.htm)
 
