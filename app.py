@@ -232,7 +232,7 @@ if df_total is not None:
             ["Lei nº 15.191/2025", "Modifica os valores da tabela progressiva mensal do IRPF.", "https://www.planalto.gov.br/ccivil_03/_Ato2023-2026/2025/Lei/L15191.htm"],
             ["Decreto nº 12.586/2025", "Estrutura regimental e cargos comissionados da FUNARTE", "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/decreto/D12586.htm"],
             ["Lei nº 15.270/2025", "Zera o imposto de renda para rendimentos até R$ 5.000,00.", "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15270.htm"],
-            ["Projeto de Lei nº 5.874/2025", "Proposta de reestruturação remuneratória.", "https://www25.senado.leg.br/web/atividade/materias/-/materia/172946"]
+            ["Lei nº 15.367/2026", "Reestruturação remuneratória entre outros...", "https://www.in.gov.br/web/dou/-/lei-n-15.367-de-30-de-marco-de-2026-696676817"]
         ]
         for item in legislação:
             st.markdown(f"**[{item[0]}]({item[2]})** — {item[1]}")
