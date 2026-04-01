@@ -121,39 +121,39 @@ if df_total is not None:
         st.sidebar.warning("Arquivo de saúde não encontrado.")
     
 st.sidebar.markdown("---")
-    
+
 # 1. Botão para ativar/desativar a função
 usar_fce = st.sidebar.toggle("Exerce função comissionada?", value=False)
-    
+
 func_input = 0.0  # Valor padrão
-    
+
 if usar_fce:
-        # 2. Organização da explicação com interrogação
-        col_info, col_help = st.sidebar.columns([0.85, 0.15])
-        with col_help:
-            st.help("""**Explicando as funções comissionadas:**
+    # 2. Organização da explicação com interrogação
+    col_info, col_help = st.sidebar.columns([0.85, 0.15])
+    with col_help:
+        st.help("""**Explicando as funções comissionadas:**
 Código 1: Cargos de direção;
 Código 2: Cargos de acessoramento;
 Código 3: Cargos de direção de projetos;
 Código 4: Acessoramento técnico especializado.
 
 Considerando que todas as remunerações de Funções Comissionadas estão reguladas pelos seguintes regramentos jurídicos: Lei nº 11.356/2006, Lei nº 11.526/2007, Lei nº 14.204/2021 e Lei nº 15.141/2025""")
-        
-        with col_info:
-            if df_fce_ref is not None:
-                # 3. Lista suspensa com os dados do fce.csv
-                fce_selecionada = st.selectbox("Selecione sua Função", df_fce_ref['Função'].unique())
-                
-                # 4. Busca o valor e converte para número
-                valor_fce_str = df_fce_ref[df_fce_ref['Função'] == fce_selecionada]['Valor'].values[0]
-                func_input = limpar_valor(valor_fce_str)
-                
-                st.caption(f"Valor da Função: R$ {formatar_br(func_input)}")
-            else:
-                st.error("Arquivo fce.csv não carregado.")
+    
+    with col_info:
+        if df_fce_ref is not None:
+            # 3. Lista suspensa com os dados do fce.csv
+            fce_selecionada = st.selectbox("Selecione sua Função", df_fce_ref['Função'].unique())
+            
+            # 4. Busca o valor e converte para número
+            valor_fce_str = df_fce_ref[df_fce_ref['Função'] == fce_selecionada]['Valor'].values[0]
+            func_input = limpar_valor(valor_fce_str)
+            
+            st.caption(f"Valor da Função: R$ {formatar_br(func_input)}")
+        else:
+            st.error("Arquivo fce.csv não carregado.")
 
-    # Mantém o campo de dependentes logo abaixo
-    dep_ir = st.sidebar.number_input("Dependentes IRPF", min_value=0, max_value=10)
+# Mantém o campo de dependentes logo abaixo (FORA do if)
+dep_ir = st.sidebar.number_input("Dependentes IRPF", min_value=0, max_value=10)
 
     if vinculo == "Ativo":
         pontos = st.sidebar.select_slider("Pontos GDAC", [50, 80, 100], 100)
