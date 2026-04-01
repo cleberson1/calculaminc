@@ -196,24 +196,30 @@ usar_fce = st.sidebar.toggle("Exerce função comissionada?", value=False)
 func_input = 0.0
 
 if usar_fce:
-    col_info, col_help = st.sidebar.columns([0.85, 0.15])
-    with col_help:
-        st.help("""**Explicando as funções comissionadas:**
-Código 1: Cargos de direção;
-Código 2: Cargos de acessoramento;
-Código 3: Cargos de direção de projetos;
-Código 4: Acessoramento técnico especializado.
-
-Considerando que todas as remunerações de Funções Comissionadas estão reguladas pelos seguintes regramentos jurídicos: Lei nº 11.356/2006, Lei nº 11.526/2007, Lei nº 14.204/2021 e Lei nº 15.141/2025""")
+    # Usando expander para explicação ao invés de st.help()
+    with st.sidebar.expander("ℹ️ Sobre Funções Comissionadas"):
+        st.markdown("""
+        **Explicando as funções comissionadas:**
+        
+        - **Código 1**: Cargos de direção
+        - **Código 2**: Cargos de assessoramento
+        - **Código 3**: Cargos de direção de projetos
+        - **Código 4**: Assessoramento técnico especializado
+        
+        *Considerando que todas as remunerações de Funções Comissionadas estão reguladas pelos seguintes regramentos jurídicos:*
+        - Lei nº 11.356/2006
+        - Lei nº 11.526/2007
+        - Lei nº 14.204/2021
+        - Lei nº 15.141/2025
+        """)
     
-    with col_info:
-        if df_fce_ref is not None:
-            fce_selecionada = st.selectbox("Selecione sua Função", df_fce_ref['Função'].unique())
-            valor_fce_str = df_fce_ref[df_fce_ref['Função'] == fce_selecionada]['Valor'].values[0]
-            func_input = limpar_valor(valor_fce_str)
-            st.caption(f"Valor da Função: R$ {formatar_br(func_input)}")
-        else:
-            st.error("Arquivo fce.csv não encontrado. Função comissionada indisponível.")
+    if df_fce_ref is not None:
+        fce_selecionada = st.sidebar.selectbox("Selecione sua Função", df_fce_ref['Função'].unique())
+        valor_fce_str = df_fce_ref[df_fce_ref['Função'] == fce_selecionada]['Valor'].values[0]
+        func_input = limpar_valor(valor_fce_str)
+        st.sidebar.caption(f"Valor da Função: R$ {formatar_br(func_input)}")
+    else:
+        st.sidebar.error("Arquivo fce.csv não encontrado. Função comissionada indisponível.")
 
 st.sidebar.markdown("---")
 
