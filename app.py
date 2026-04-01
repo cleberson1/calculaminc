@@ -122,12 +122,12 @@ if df_total is not None:
     
 st.sidebar.markdown("---")
     
-    # 1. Botão para ativar/desativar a função
-    usar_fce = st.sidebar.toggle("Exerce função comissionada?", value=False)
+# 1. Botão para ativar/desativar a função
+usar_fce = st.sidebar.toggle("Exerce função comissionada?", value=False)
     
-    func_input = 0.0  # Valor padrão
+func_input = 0.0  # Valor padrão
     
-    if usar_fce:
+if usar_fce:
         # 2. Organização da explicação com interrogação
         col_info, col_help = st.sidebar.columns([0.85, 0.15])
         with col_help:
