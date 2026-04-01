@@ -190,8 +190,6 @@ if usar_saude and df_saude_ref is not None:
 elif usar_saude:
     st.sidebar.warning("Arquivo de saúde não encontrado.")
 
-st.sidebar.markdown("---")
-
 # Botão para função comissionada
 usar_fce = st.sidebar.toggle("Exerce função comissionada?", value=False)
 
@@ -216,6 +214,8 @@ Considerando que todas as remunerações de Funções Comissionadas estão regul
             st.caption(f"Valor da Função: R$ {formatar_br(func_input)}")
         else:
             st.error("Arquivo fce.csv não encontrado. Função comissionada indisponível.")
+
+st.sidebar.markdown("---")
 
 # Campo de dependentes
 dep_ir = st.sidebar.number_input("Dependentes IRPF", min_value=0, max_value=10, value=0)
