@@ -72,6 +72,14 @@ def obter_valor_saude(base_calculo, faixa_etaria_col, df_saude):
     return limpar_valor(df_saude.iloc[idx][faixa_etaria_col])
 
 @st.cache_data
+def carregar_tabela_fce():
+    if os.path.exists("fce.csv"):
+        return pd.read_csv("fce.csv", sep=';', encoding='utf-8')
+    return None
+
+df_fce_ref = carregar_tabela_fce()
+
+@st.cache_data
 def carregar_dados():
     niveis = {"SUPERIOR": "superior", "INTERMEDIÁRIO": "intermediario", "AUXILIAR": "auxiliar"}
     sufixos = {"-2025": "Tabela Vigente 01/01/2025", "-PL": "Lei nº 15.367/2026"}
@@ -112,8 +120,39 @@ if df_total is not None:
     elif usar_saude:
         st.sidebar.warning("Arquivo de saúde não encontrado.")
     
-    st.sidebar.markdown("---")
-    func_input = st.sidebar.number_input("Função Comissionada (R$)", min_value=0.0, step=0.01)
+st.sidebar.markdown("---")
+    
+    # 1. Botão para ativar/desativar a função
+    usar_fce = st.sidebar.toggle("Exerce função comissionada?", value=False)
+    
+    func_input = 0.0  # Valor padrão
+    
+    if usar_fce:
+        # 2. Organização da explicação com interrogação
+        col_info, col_help = st.sidebar.columns([0.85, 0.15])
+        with col_help:
+            st.help("""**Explicando as funções comissionadas:**
+Código 1: Cargos de direção;
+Código 2: Cargos de acessoramento;
+Código 3: Cargos de direção de projetos;
+Código 4: Acessoramento técnico especializado.
+
+Considerando que todas as remunerações de Funções Comissionadas estão reguladas pelos seguintes regramentos jurídicos: Lei nº 11.356/2006, Lei nº 11.526/2007, Lei nº 14.204/2021 e Lei nº 15.141/2025""")
+        
+        with col_info:
+            if df_fce_ref is not None:
+                # 3. Lista suspensa com os dados do fce.csv
+                fce_selecionada = st.selectbox("Selecione sua Função", df_fce_ref['Função'].unique())
+                
+                # 4. Busca o valor e converte para número
+                valor_fce_str = df_fce_ref[df_fce_ref['Função'] == fce_selecionada]['Valor'].values[0]
+                func_input = limpar_valor(valor_fce_str)
+                
+                st.caption(f"Valor da Função: R$ {formatar_br(func_input)}")
+            else:
+                st.error("Arquivo fce.csv não carregado.")
+
+    # Mantém o campo de dependentes logo abaixo
     dep_ir = st.sidebar.number_input("Dependentes IRPF", min_value=0, max_value=10)
 
     if vinculo == "Ativo":
@@ -168,13 +207,16 @@ if df_total is not None:
                 st.write(f"Vencimento Básico: R$ {formatar_br(res['VB'])}")
                 st.write(f"GDAC ({pontos} pts): R$ {formatar_br(res['GDAC'])}")
                 
-                # Itens extras que você solicitou:
+                # Exibe a Função Comissionada se o valor for maior que zero
                 if res['FUNC'] > 0:
                     st.write(f"Função Comissionada: R$ {formatar_br(res['FUNC'])}")
+                
                 if res['ALIM'] > 0:
                     st.write(f"Auxílio Alimentação: R$ {formatar_br(res['ALIM'])}")
+                
                 if res['PRE'] > 0:
                     st.write(f"Auxílio Pré-Escolar: R$ {formatar_br(res['PRE'])}")
+                
                 if res['SAUDE'] > 0:
                     st.success(f"Saúde Suplementar: R$ {formatar_br(res['SAUDE'])}")
 
