@@ -151,82 +151,85 @@ Considerando que todas as remunerações de Funções Comissionadas estão regul
             st.caption(f"Valor da Função: R$ {formatar_br(func_input)}")
         else:
             st.error("Arquivo fce.csv não carregado.")
+# ... (previous code remains the same until line 156)
 
 # Mantém o campo de dependentes logo abaixo (FORA do if)
 dep_ir = st.sidebar.number_input("Dependentes IRPF", min_value=0, max_value=10)
 
-    if vinculo == "Ativo":
-        pontos = st.sidebar.select_slider("Pontos GDAC", [50, 80, 100], 100)
-        pre_input = st.sidebar.number_input("Filhos (Pré-Escolar)", 0, 5) * 484.90
-        alim = 1175.0
-    else:
-        pontos, pre_input, alim = 50, 0.0, 0.0
+# The following lines were incorrectly indented
+if vinculo == "Ativo":
+    pontos = st.sidebar.select_slider("Pontos GDAC", [50, 80, 100], 100)
+    pre_input = st.sidebar.number_input("Filhos (Pré-Escolar)", 0, 5) * 484.90
+    alim = 1175.0
+else:
+    pontos = 50
+    pre_input = 0.0
+    alim = 0.0
 
-    # --- 5. LÓGICA DE CÁLCULO ---
-    def calcular(nome_cenario):
-        try:
-            filt = (df_total['cenario_ref'] == nome_cenario) & (df_total['nivel_ref'] == nivel_sel) & \
-                   (df_total['classe'] == classe_sel) & (df_total['padrao'] == padrao_sel)
-            linha = df_total[filt].iloc[0]
-            
-            vb = linha['vb']
-            gdac = linha[f'gdac_{pontos}']
-            
-            # Saúde calculada apenas se o botão estiver ativo
-            saude = obter_valor_saude(vb + gdac, faixa_etaria_sel, df_saude_ref) if usar_saude else 0.0
-            
-            base_pss = vb + gdac + func_input
-            pss = calcular_pss(base_pss, vinculo)
-            
-            base_irpf = max(0, (vb + gdac + func_input) - pss - (dep_ir * 189.59))
-            ir, aliq, red = calcular_irpf(base_irpf, nome_cenario)
-            
-            bruto = vb + gdac + alim + func_input + pre_input + saude
-            return {"VB": vb, "GDAC": gdac, "ALIM": alim, "FUNC": func_input, "PRE": pre_input, 
-                    "SAUDE": saude, "BRUTO": bruto, "IR": ir, "PSS": pss, "LIQ": bruto-ir-pss, "RED": red}
-        except: return None
+# --- 5. LÓGICA DE CÁLCULO ---
+def calcular(nome_cenario):
+    try:
+        filt = (df_total['cenario_ref'] == nome_cenario) & (df_total['nivel_ref'] == nivel_sel) & \
+               (df_total['classe'] == classe_sel) & (df_total['padrao'] == padrao_sel)
+        linha = df_total[filt].iloc[0]
+        
+        vb = linha['vb']
+        gdac = linha[f'gdac_{pontos}']
+        
+        # Saúde calculada apenas se o botão estiver ativo
+        saude = obter_valor_saude(vb + gdac, faixa_etaria_sel, df_saude_ref) if usar_saude else 0.0
+        
+        base_pss = vb + gdac + func_input
+        pss = calcular_pss(base_pss, vinculo)
+        
+        base_irpf = max(0, (vb + gdac + func_input) - pss - (dep_ir * 189.59))
+        ir, aliq, red = calcular_irpf(base_irpf, nome_cenario)
+        
+        bruto = vb + gdac + alim + func_input + pre_input + saude
+        return {"VB": vb, "GDAC": gdac, "ALIM": alim, "FUNC": func_input, "PRE": pre_input, 
+                "SAUDE": saude, "BRUTO": bruto, "IR": ir, "PSS": pss, "LIQ": bruto-ir-pss, "RED": red}
+    except: return None
 
-    res_25 = calcular("Tabela Vigente 01/01/2025")
-    res_26 = calcular("Lei nº 15.367/2026")
+res_25 = calcular("Tabela Vigente 01/01/2025")
+res_26 = calcular("Lei nº 15.367/2026")
 
-    # --- 6. UI PRINCIPAL ---
-    st.title("🗿 Simulador Salarial MINC")
-    t1, t2, t3 = st.tabs(["🎯 Individual", "📊 Comparativo", "📜 Normas"])
+# --- 6. UI PRINCIPAL ---
+st.title("🗿 Simulador Salarial MINC")
+t1, t2, t3 = st.tabs(["🎯 Individual", "📊 Comparativo", "📜 Normas"])
 
-    with t1:
-        res = res_25 if cenario_foco == "Tabela Vigente 01/01/2025" else res_26
-        if res:
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Bruto", f"R$ {formatar_br(res['BRUTO'])}")
-            c2.metric("Descontos", f"R$ {formatar_br(res['IR'] + res['PSS'])}")
-            c3.metric("Líquido", f"R$ {formatar_br(res['LIQ'])}")
+with t1:
+    res = res_25 if cenario_foco == "Tabela Vigente 01/01/2025" else res_26
+    if res:
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Bruto", f"R$ {formatar_br(res['BRUTO'])}")
+        c2.metric("Descontos", f"R$ {formatar_br(res['IR'] + res['PSS'])}")
+        c3.metric("Líquido", f"R$ {formatar_br(res['LIQ'])}")
+        
+        col_l, col_r = st.columns(2)
+        with col_l:
+            st.write("**Remuneração:**")
+            st.write(f"Vencimento Básico: R$ {formatar_br(res['VB'])}")
+            st.write(f"GDAC ({pontos} pts): R$ {formatar_br(res['GDAC'])}")
             
-            col_l, col_r = st.columns(2)
-            with col_l:
-                st.write("**Remuneração:**")
-                st.write(f"Vencimento Básico: R$ {formatar_br(res['VB'])}")
-                st.write(f"GDAC ({pontos} pts): R$ {formatar_br(res['GDAC'])}")
-                
-                # Exibe a Função Comissionada se o valor for maior que zero
-                if res['FUNC'] > 0:
-                    st.write(f"Função Comissionada: R$ {formatar_br(res['FUNC'])}")
-                
-                if res['ALIM'] > 0:
-                    st.write(f"Auxílio Alimentação: R$ {formatar_br(res['ALIM'])}")
-                
-                if res['PRE'] > 0:
-                    st.write(f"Auxílio Pré-Escolar: R$ {formatar_br(res['PRE'])}")
-                
-                if res['SAUDE'] > 0:
-                    st.success(f"Saúde Suplementar: R$ {formatar_br(res['SAUDE'])}")
+            # Exibe a Função Comissionada se o valor for maior que zero
+            if res['FUNC'] > 0:
+                st.write(f"Função Comissionada: R$ {formatar_br(res['FUNC'])}")
+            
+            if res['ALIM'] > 0:
+                st.write(f"Auxílio Alimentação: R$ {formatar_br(res['ALIM'])}")
+            
+            if res['PRE'] > 0:
+                st.write(f"Auxílio Pré-Escolar: R$ {formatar_br(res['PRE'])}")
+            
+            if res['SAUDE'] > 0:
+                st.success(f"Saúde Suplementar: R$ {formatar_br(res['SAUDE'])}")
 
-            with col_r:
-                # O ERRO ESTAVA AQUI: certifique-se de que as linhas abaixo tenham recuo
-                st.write("**Deduções:**")
-                st.write(f"Previdência (PSS): R$ {formatar_br(res['PSS'])}")
-                st.write(f"Imposto de Renda: R$ {formatar_br(res['IR'])}")
-                if res['RED'] > 0:
-                    st.info(f"Redução Lei 15.270/25: R$ {formatar_br(res['RED'])}")
+        with col_r:
+            st.write("**Deduções:**")
+            st.write(f"Previdência (PSS): R$ {formatar_br(res['PSS'])}")
+            st.write(f"Imposto de Renda: R$ {formatar_br(res['IR'])}")
+            if res['RED'] > 0:
+                st.info(f"Redução Lei 15.270/25: R$ {formatar_br(res['RED'])}")
 
     with t2:
         if res_25 and res_26:
