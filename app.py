@@ -337,8 +337,8 @@ with t3:
         ["Lei nº 15.191/2025", "Modifica os valores da tabela progressiva mensal do IRPF.", "https://www.planalto.gov.br/ccivil_03/_Ato2023-2026/2025/Lei/L15191.htm"],
         ["Decreto nº 12.586/2025", "Estrutura regimental e cargos comissionados da FUNARTE", "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/decreto/D12586.htm"],
         ["Lei nº 15.270/2025", "Zera o imposto de renda para rendimentos até R$ 5.000,00.", "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15270.htm"],
-        ["Lei nº 15.367/2026", "Reestruturação remuneratória entre outros...", "https://www.in.gov.br/web/dou/-/lei-n-15.367-de-30-de-marco-de-2026-696676817"]
-        ["Portaria MGI nº 2.756/2026", "Fixa o valor mensal do auxílio-alimentação.", "https://www.in.gov.br/en/web/dou/-/portaria-mgi-n-2.756-de-31-de-marco-de-2026-697045786"],
+        ["Lei nº 15.367/2026", "Reestruturação remuneratória entre outros...", "https://www.in.gov.br/web/dou/-/lei-n-15.367-de-30-de-marco-de-2026-696676817"],
+        ["Portaria MGI nº 2.756/2026", "Fixa o valor mensal do auxílio-alimentação.", "https://www.in.gov.br/en/web/dou/-/portaria-mgi-n-2.756-de-31-de-marco-de-2026-697045786"]
     ]
     for item in legislação:
         st.markdown(f"**[{item[0]}]({item[2]})** — {item[1]}")
@@ -348,6 +348,7 @@ st.markdown("---")
 st.markdown(
     "<div style='text-align: center; color: gray; font-size: 0.8em;'>"
     "Elaborado por 🚀GT de Elaboração das Emendas🚀 e 🔥Comando Nacional de Acompanhamento🔥"
+    "Bomba Patch 100% Atualizado"
     "</div>", 
     unsafe_allow_html=True
 )
