@@ -15,7 +15,7 @@ Decreto nº 11.203, de 21 de Setembro de 2022 — Estrutura regimental e cargos 
 
 Decreto nº 11.233, de 10 de Outubro de 2022 — Estrutura regimental e cargos comissionados da BN (https://www.planalto.gov.br/ccivil_03/_ato2019—2022/2022/decreto/D11233.htm)
 
-Instrução Normativa SGP/SEDGG/ME nº 97, de 26 de Dezembro de 2022 — Orientações sobre a saúde suplementar federal (https://www.in.gov.br/en/web/dou/—/instrucao—normativa—sgp/sedgg/me—n—97—de—26—de—dezembro—de—2022—454820592)
+Instrução Normativa SGP/SEDGG/ME nº 97, de 26 de Dezembro de 2022 — Orientações sobre a saúde suplementar federal (https://www.in.gov.br/en/web/dou/-/instrucao-normativa-sgp/sedgg/me-n-97-de-26-de-dezembro-de-2022-454820592)
 
 Decreto nº 11.336, de 1º de Janeiro de 2023 — Estrutura regimental e cargos comissionados do MinC (https://www.planalto.gov.br/ccivil_03/_ato2023—2026/2023/decreto/d11336.htm)
 
@@ -27,11 +27,11 @@ Termo de Acordo nº 08/2024 — PGPE e PECs Setoriais — propostas dos servidor
 
 Decreto nº 12.335, de 20 de Dezembro de 2024 — Estrutura regimental e cargos comissionados do IBRAM (https://www.planalto.gov.br/ccivil_03/_ato2023—2026/2024/decreto/d12335.htm)
 
-Portaria Interministerial MPS/MF Nº 6, de 10 de Janeiro de 2025 — Reajuste do Regulamento da Previdência Social (https://www.in.gov.br/en/web/dou/—/portaria—interministerial—mps/mf—n—6—de—10—de—janeiro—de—2025—606526848)
+Portaria Interministerial MPS/MF Nº 6, de 10 de Janeiro de 2025 — Reajuste do Regulamento da Previdência Social (https://www.in.gov.br/en/web/dou/-/portaria-interministerial-mps/mf-n-6-de-10-de-janeiro-de-2025-606526848)
 
-Lei nº 15.191, de 11 de Agosto de 2025 — Modifica os valores da tabela progressiva mensal do IRPF (https://www.planalto.gov.br/ccivil_03/_Ato2023—2026/2025/Lei/L15191.htm)
+Lei nº 15.191, de 11 de Agosto de 2025 — Modifica os valores da tabela progressiva mensal do IRPF (https://www.planalto.gov.br/ccivil_03/_Ato2023-2026/2025/Lei/L15191.htm)
 
-Decreto nº 12.586, de 12 de Agosto de 2025 — Estrutura regimental e cargos comissionados da FUNARTE (https://www.planalto.gov.br/ccivil_03/_ato2023—2026/2025/decreto/D12586.htm)
+Decreto nº 12.586, de 12 de Agosto de 2025 — Estrutura regimental e cargos comissionados da FUNARTE (https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/decreto/D12586.htm)
 
 Lei nº 15.270 de 26 de Novembro de 2025 — Zera o imposto de renda até R$ 5.000,00 (https://www.planalto.gov.br/ccivil_03/_ato2023—2026/2025/lei/l15270.htm)
 
