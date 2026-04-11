@@ -230,7 +230,7 @@ dep_ir = st.sidebar.number_input("Dependentes IRPF", min_value=0, max_value=10, 
 if vinculo == "Ativo":
     pontos = st.sidebar.select_slider("Pontos GDAC", [50, 80, 100], 100)
     pre_input = st.sidebar.number_input("Filhos (Pré-Escolar)", min_value=0, max_value=5, value=0) * 484.90
-    alim = 1175.0
+    alim = 1192.0
 else:
     pontos = 50
     pre_input = 0.0
@@ -334,11 +334,11 @@ with t3:
         ["Termo de Acordo nº 08/2024", "PGPE e PECs Setoriais - propostas dos servidores federais.", "https://www.condsef.org.br/documentos/pgpe-pecs-setoriais-termo-acordo-n-08-2024"],
         ["Decreto nº 12.335/2024", "Estrutura regimental e cargos comissionados do IBRAM", "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/decreto/d12335.htm"],
         ["Portaria Interministerial MPS/MF nº 6/2025", "Reajuste do Regulamento da Previdência Social e Alíquotas PSS.", "https://www.in.gov.br/en/web/dou/-/portaria-interministerial-mps/mf-n-6-de-10-de-janeiro-de-2025-606526848"],
-        ["Portaria MGI nº 9.888/2025", "Fixa o valor mensal do auxílio-alimentação.", "https://www.in.gov.br/web/dou/-/portaria/mgi-n-9.888-de-6-de-novembro-de-2025-667427345"],
         ["Lei nº 15.191/2025", "Modifica os valores da tabela progressiva mensal do IRPF.", "https://www.planalto.gov.br/ccivil_03/_Ato2023-2026/2025/Lei/L15191.htm"],
         ["Decreto nº 12.586/2025", "Estrutura regimental e cargos comissionados da FUNARTE", "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/decreto/D12586.htm"],
         ["Lei nº 15.270/2025", "Zera o imposto de renda para rendimentos até R$ 5.000,00.", "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15270.htm"],
         ["Lei nº 15.367/2026", "Reestruturação remuneratória entre outros...", "https://www.in.gov.br/web/dou/-/lei-n-15.367-de-30-de-marco-de-2026-696676817"]
+        ["Portaria MGI nº 2.756/2026", "Fixa o valor mensal do auxílio-alimentação.", "https://www.in.gov.br/en/web/dou/-/portaria-mgi-n-2.756-de-31-de-marco-de-2026-697045786"],
     ]
     for item in legislação:
         st.markdown(f"**[{item[0]}]({item[2]})** — {item[1]}")
