@@ -33,8 +33,8 @@ Lei nº 15.191, de 11 de Agosto de 2025 — Modifica os valores da tabela progre
 
 Decreto nº 12.586, de 12 de Agosto de 2025 — Estrutura regimental e cargos comissionados da FUNARTE (https://www.planalto.gov.br/ccivil_03/_ato2023—2026/2025/decreto/D12586.htm)
 
-Portaria MGI nº 9.888, de 6 de Novembro de 2025 — Fixa o valor mensal do auxílio—alimentação (https://www.in.gov.br/web/dou/-/portaria/mgi-n-9.888-de-6-de-novembro-de-2025-667427345)
-
 Lei nº 15.270 de 26 de Novembro de 2025 — Zera o imposto de renda até R$ 5.000,00 (https://www.planalto.gov.br/ccivil_03/_ato2023—2026/2025/lei/l15270.htm)
 
-Lei nº 15.367, de 30 de Março de 2026 — Reestruturação remuneratória entre outros... (https://www.in.gov.br/web/dou/—/lei—n—15.367—de—30—de—marco—de—2026—696676817)
+Lei nº 15.367, de 30 de Março de 2026 — Reestruturação remuneratória entre outros... (https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2026/lei/L15367.htm)
+
+Portaria MGI nº 2.756, de 31 de Março de 2026 — Fixa o valor mensal do auxílio—alimentação (https://www.in.gov.br/en/web/dou/-/portaria-mgi-n-2.756-de-31-de-marco-de-2026-697045786)
